@@ -16,12 +16,15 @@ import { Position } from 'vs/editor/common/core/position';
 
 export function getHover(model: ITextModel, position: Position): TPromise<Hover[]> {
 
-	const supports = HoverProviderRegistry.ordered(model);
+	const hoverProviders = HoverProviderRegistry.ordered(model);
+	const hoverTransformationProviders = [];
 	const values: Hover[] = [];
 
-	const promises = supports.map((support, idx) => {
+	const promises = hoverProviders.map((support, idx) => {
 		return asWinJsPromise((token) => {
-			return support.provideHover(model, position, token);
+			const preTransformHover = support.provideHover(model, position, token);
+			//transformations
+			return  preTransformHover;
 		}).then((result) => {
 			if (result) {
 				let hasRange = (typeof result.range !== 'undefined');
